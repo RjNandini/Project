@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Project Management App - Tasks</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles1.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&family=Roboto:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- <div class="container">
+    <div class="sidebar">
+      <h2><a href="/projects">Projects</a></h2>
+      <ul>
+        <% projects.forEach((proj)=> { %>
+          <li data-project-id="<%= proj._id %>">
+            <a href="/projects/<%= proj._id %>/tasks">
+              <%= proj.name %>
+            </a>
+            <button class="delete-button">Delete</button>
+          </li>
+          <% }); %>
+      </ul>
+      <input type="text" id="projectNameInput" placeholder="Project name" required>
+      <input type="text" id="projectDescriptionInput" placeholder="Project description">
+      <button id="addProjectButton">Add Project</button>
+    </div> -->
+  <div class="container">
+    <div class="sidebar">
+      <h2><a href="/projects">Projects</a></h2>
+      <ul>
+        <% projects.forEach((project)=> { %>
+          <li>
+            <div class="project-info">
+              <a href="/projects/<%= project._id %>/tasks">
+             <span>   <%= project.name %></span>
+              </a>
+              <div class="project-buttons">
+                <button class="delete-button" onclick="deleteProject('<%= project._id %>')">Delete</button>
+                <button class="edit-button" onclick="toggleEditForm('<%= project._id %>')">Edit</button>
+              </div>
+            </div>
+            <div class="edit-form" id="editForm<%= project._id %>">
+              <input type="text" class="p-update" id="updateNameInput_<%= project._id %>" placeholder="Update Name" required>
+              <input type="text"  class="p-update"  id="updateDescriptionInput_<%= project._id %>" placeholder="Update Description">
+              <button onclick="updateProject('<%= project._id %>')">Update</button>
+            </div>
+
+          </li>
+          <% }); %>
+      </ul>
+      <button class="new-project-button" onclick="toggleAddForm()">Add New Project</button>
+      <div class="add-form" id="addForm">
+        <input type="text" class="p-update" id="projectNameInput" placeholder="Project name" required>
+        <input type="text" class="p-update" id="projectDescriptionInput" placeholder="Project description">
+        <button id="addProjectButton">Add Project</button>
+      </div>
+    </div>
+    <div class="main">
+      <h2>
+        <%= project.name %>
+      </h2>
+      <% if (project.tasks.length===0) { %>
+        <p>No tasks yet.</p>
+        <% } else { %>
+          <ul>
+            <% project.tasks.forEach((task)=> { %>
+              <li data-task-id="<%= task._id %>">
+                <%= task.name %>
+                  <button class="delete-button">Delete</button>
+              </li>
+              <% }); %>
+
+          </ul>
+          <% } %>
+            <input type="text" class="p-input" id="taskNameInput" placeholder="Task name" required>
+            <input type="text" class="p-input" id="taskDescriptionInput" placeholder="Task description">
+            <button class="btn" id="addTaskButton">Add Task</button>
+    </div>
+  </div>
+  <script src ="/indexscript.js"></script>
+  <script>
+
+    // const addProjectButton = document.getElementById('addProjectButton');
+    // const projectNameInput = document.getElementById('projectNameInput');
+    // const projectDescriptionInput = document.getElementById('projectDescriptionInput');
+
+    // function createProject() {
+    //   const projectName = projectNameInput.value.trim();
+    //   if (projectName === '') {
+    //     alert('Project name is required.');
+    //     return;
+    //   }
+
+    //   const projectDescription = projectDescriptionInput.value.trim();
+
+    //   const projectData = { name: projectName, description: projectDescription };
+    //   fetch('/projects', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(projectData),
+    //   })
+    //     .then((response) => {
+    //       if (response.ok) {
+    //         // If the response is successful, clear the input fields and reload the page to see the updated projects
+    //         projectNameInput.value = '';
+    //         projectDescriptionInput.value = '';
+    //         window.location.reload();
+    //       } else {
+    //         // Handle errors if the server response is not successful
+    //         console.error('Error creating project:', response.statusText);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error('Error creating project:', error);
+    //     });
+    // }
+
+    // addProjectButton.addEventListener('click', createProject);
+
+    // // Add event listeners for Enter key press on input fields
+    // projectNameInput.addEventListener('keydown', (event) => {
+    //   if (event.key === 'Enter') {
+    //     event.preventDefault(); // Prevent form submission
+    //     createProject(); // Call the function to create the project
+    //   }
+    // });
+
+    // projectDescriptionInput.addEventListener('keydown', (event) => {
+    //   if (event.key === 'Enter') {
+    //     event.preventDefault(); // Prevent form submission
+    //     createProject(); // Call the function to create the project
+    //   }
+    // });
+
+
+    const addTaskButton = document.getElementById('addTaskButton');
+    const taskNameInput = document.getElementById('taskNameInput');
+    const taskDescriptionInput = document.getElementById('taskDescriptionInput');
+
+    function addTask() {
+      const taskName = taskNameInput.value.trim();
+      if (taskName === '') {
+        alert('Task name is required.');
+        return;
+      }
+
+      const taskDescription = taskDescriptionInput.value.trim();
+      const taskData = { name: taskName, description: taskDescription };
+
+      fetch(`/projects/<%= project._id %>/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(taskData),
+      })
+        .then((response) => {
+          if (response.ok) {
+            // If the response is successful, clear the input fields and reload the page to see the updated tasks
+            taskNameInput.value = '';
+            taskDescriptionInput.value = '';
+            window.location.reload();
+          } else {
+            // Handle errors if the server response is not successful
+            console.error('Error adding task:', response.statusText);
+          }
+        })
+        .catch((error) => {
+          console.error('Error adding task:', error);
+        });
+    }
+
+    addTaskButton.addEventListener('click', addTask);
+
+    // Add event listeners for Enter key press on input fields
+    taskNameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        addTask(); // Call the function to add the task
+      }
+    });
+
+    taskDescriptionInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        addTask(); // Call the function to add the task
+      }
+    });
+
+    // async function deleteProject(projectId, currentProjectId) {
+    //   const confirmed = confirm('Are you sure you want to delete this project?');
+    //   if (!confirmed) {
+    //     return;
+    //   }
+
+    //   try {
+    //     const response = await fetch(`/projects/${projectId}`, {
+    //       method: 'DELETE',
+    //     });
+
+    //     if (response.ok) {
+    //       // If the response is successful, check the status code
+    //       if (response.status === 204) {
+    //         if (projectId === currentProjectId) {
+    //           // If the deleted project is the same as the current project, redirect to /projects
+    //           window.location.href = '/projects';
+    //         } else {
+    //           // If the deleted project is different from the current project, stay on the same page
+    //           window.location.reload();
+    //         }
+    //       } else if (response.status === 404) {
+    //         // Project was not found (already deleted), handle this case
+    //         alert('The project was not found.');
+    //       } else {
+    //         // Handle other server response status codes if needed
+    //         console.error('Error deleting project:', response.statusText);
+    //       }
+    //     } else {
+    //       // Handle errors if the server response is not successful
+    //       console.error('Error deleting project:', response.statusText);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error deleting project:', error);
+    //   }
+    // }
+
+    // async function fetchProjectsAndUpdateSidebar() {
+    //   try {
+    //     const response = await fetch('/projects', {
+    //       method: 'GET',
+    //     });
+
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       const projects = data.projects;
+
+    //       // Update the sidebar with the latest projects
+    //       const sidebar = document.querySelector('.sidebar ul');
+    //       sidebar.innerHTML = '';
+    //       projects.forEach((project) => {
+    //         const listItem = document.createElement('li');
+    //         const link = document.createElement('a');
+    //         link.href = `/projects/${project._id}/tasks`;
+    //         link.textContent = project.name;
+
+    //         const deleteButton = document.createElement('button');
+    //         deleteButton.classList.add('delete-button');
+    //         deleteButton.textContent = 'Delete';
+    //         deleteButton.dataset.projectId = project._id;
+    //         deleteButton.addEventListener('click', (event) => {
+    //           const projectId = event.target.dataset.projectId;
+    //           deleteProject(projectId);
+    //         });
+
+    //         listItem.appendChild(link);
+    //         listItem.appendChild(deleteButton);
+    //         sidebar.appendChild(listItem);
+    //       });
+    //     } else {
+    //       console.error('Error fetching projects:', response.statusText);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching projects:', error);
+    //   }
+    // }
+
+
+    // const liElements = document.querySelectorAll('.sidebar li');
+    // liElements.forEach((li) => {
+    //   const deleteButton = li.querySelector('.delete-button');
+    //   deleteButton.addEventListener('click', async (event) => {
+    //     const projectId = li.dataset.projectId; // This is the ID of the project we want to delete
+    //     const currentProjectId = '<%= currProjectId%>'; // Access the currentProject ID
+    //     console.log(projectId, currentProjectId);
+    //     deleteProject(projectId, currentProjectId);
+    //   });
+    // });
+
+    async function deleteTask(taskId) {
+      try {
+        // Send a DELETE request to delete the task using the provided taskId
+        const response = await fetch(`/tasks/${taskId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          // If the response is successful, reload the page to update the task list
+          window.location.reload();
+        } else {
+          console.error('Failed to delete task:', response.status);
+        }
+      } catch (error) {
+        console.error('Error deleting task:', error);
+      }
+    }
+
+    // Add event listener to the delete buttons for tasks
+    const main = document.querySelector('.main');
+    main.addEventListener('click', (event) => {
+      if (event.target.classList.contains('delete-button')) {
+        const liElement = event.target.closest('li');
+        const taskId = liElement.dataset.taskId; // This is the ID of the task we want to delete
+        deleteTask(taskId);
+      }
+    });
+
+
+
+  </script>
+
+</body>
+
+</html>
